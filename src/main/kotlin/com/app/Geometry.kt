@@ -106,7 +106,6 @@ data class Geometry(val faces: List<Face>)
 object Geometries {
     val cube = Geometry(
         faces = listOf(
-            // Front face (z=1) - CCW from outside
             Face(
                 points = listOf(
                     Vector3d(-1.0, -1.0, 1.0),
@@ -116,7 +115,6 @@ object Geometries {
                 ),
                 color = FaceColor.Solid(Color.WHITE)
             ),
-            // Back face (z=-1) - CCW from outside (reversed)
             Face(
                 points = listOf(
                     Vector3d(1.0, -1.0, -1.0),
@@ -126,7 +124,6 @@ object Geometries {
                 ),
                 color = FaceColor.Solid(Color.WHITE)
             ),
-            // Top face (y=1) - CCW from outside
             Face(
                 points = listOf(
                     Vector3d(-1.0, 1.0, 1.0),
@@ -136,7 +133,6 @@ object Geometries {
                 ),
                 color = FaceColor.Solid(Color.WHITE)
             ),
-            // Bottom face (y=-1) - CCW from outside (reversed)
             Face(
                 points = listOf(
                     Vector3d(-1.0, -1.0, -1.0),
@@ -144,12 +140,8 @@ object Geometries {
                     Vector3d(1.0, -1.0, 1.0),
                     Vector3d(-1.0, -1.0, 1.0)
                 ),
-                color = FaceColor.Gradient(
-                    Vector3d(-1.0, -1.0, -1.0), Vector3d(1.0, -1.0, 1.0),
-                    Color.KOTLIN_BLUE, Color.KOTLIN_PURPLE
-                )
+                color = FaceColor.Solid(Color.WHITE)
             ),
-            // Right face (x=1) - CCW from outside
             Face(
                 points = listOf(
                     Vector3d(1.0, -1.0, 1.0),
@@ -157,12 +149,8 @@ object Geometries {
                     Vector3d(1.0, 1.0, -1.0),
                     Vector3d(1.0, 1.0, 1.0)
                 ),
-                color = FaceColor.Gradient(
-                    Vector3d(1.0, -1.0, -1.0), Vector3d(1.0, 1.0, 1.0),
-                    Color.KOTLIN_BLUE, Color.KOTLIN_PURPLE
-                )
+                color = FaceColor.Solid(Color.WHITE)
             ),
-            // Left face (x=-1) - CCW from outside (reversed)
             Face(
                 points = listOf(
                     Vector3d(-1.0, -1.0, -1.0),
@@ -170,10 +158,7 @@ object Geometries {
                     Vector3d(-1.0, 1.0, 1.0),
                     Vector3d(-1.0, 1.0, -1.0)
                 ),
-                color = FaceColor.Gradient(
-                    Vector3d(-1.0, -1.0, -1.0), Vector3d(-1.0, 1.0, 1.0),
-                    Color.KOTLIN_BLUE, Color.KOTLIN_PURPLE
-                )
+                color = FaceColor.Solid(Color.WHITE)
             )
         )
     )
