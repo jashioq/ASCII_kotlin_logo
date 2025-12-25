@@ -1,22 +1,18 @@
 package com.app
 
 import org.joml.Vector3d
+import kotlin.math.min
+import kotlin.math.max
 
-/**
- * RGB color representation.
- */
 data class Color(val r: Double, val g: Double, val b: Double) {
     companion object {
         val WHITE = Color(255.0, 255.0, 255.0)
         val KOTLIN_BLUE = Color(7.0, 174.0, 255.0)
         val KOTLIN_PURPLE = Color(148.0, 93.0, 255.0)
+        val KOTLIN_PINK = Color(199.0, 87.0, 188.0)
+        val KOTLIN_ORANGE = Color(254.0, 137.0, 2.0)
     }
 
-    /**
-     * Linearly interpolate between this color and another.
-     * @param other The target color
-     * @param t Interpolation factor [0, 1]. 0 = this color, 1 = other color
-     */
     fun lerp(other: Color, t: Double): Color {
         val clampedT = t.coerceIn(0.0, 1.0)
         return Color(
@@ -27,218 +23,317 @@ data class Color(val r: Double, val g: Double, val b: Double) {
     }
 }
 
-/**
- * Defines a color gradient across a face.
- *
- * @param startCoord Starting point of the gradient in face-local coordinates [-1, 1]
- * @param endCoord Ending point of the gradient in face-local coordinates [-1, 1]
- * @param startColor Color at the start point
- * @param endColor Color at the end point
- */
-data class ColorGradient(
-    val startCoord: Vector3d,
-    val endCoord: Vector3d,
-    val startColor: Color,
-    val endColor: Color
-) {
+data class Vector2d(val x: Double, val y: Double)
 
-    /**
-     * Calculate the color at a specific point on the face.
-     * Projects the point onto the gradient line and interpolates the color.
-     */
-    fun getColorAt(point: Vector3d): Color {
-        val gradientVector = Vector3d(endCoord).sub(startCoord)
-        val gradientLength = gradientVector.length()
+sealed interface FaceColor {
+    fun getColorAt(point: Vector3d): Color
 
-        if (gradientLength < 0.0001) {
-            // Gradient start and end are at the same point, return start color
-            return startColor
-        }
-
-        val pointVector = Vector3d(point).sub(startCoord)
-
-        // Project point onto gradient line and normalize to [0, 1]
-        val projection = pointVector.dot(gradientVector) / (gradientLength * gradientLength)
-
-        return startColor.lerp(endColor, projection)
+    data class Solid(val color: Color) : FaceColor {
+        override fun getColorAt(point: Vector3d) = color
     }
 
-    companion object {
-        /**
-         * Creates a gradient with no color variation (solid color).
-         */
-        fun solid(color: Color): ColorGradient {
-            return ColorGradient(
-                Vector3d(-1.0, -1.0, 0.0),
-                Vector3d(1.0, 1.0, 0.0),
-                color,
-                color
-            )
+    data class Gradient(
+        val startPoint: Vector3d,
+        val endPoint: Vector3d,
+        val startColor: Color,
+        val endColor: Color
+    ) : FaceColor {
+        override fun getColorAt(point: Vector3d): Color {
+            val gradientVector = Vector3d(endPoint).sub(startPoint)
+            val gradientLength = gradientVector.length()
+            if (gradientLength < 0.0001) return startColor
+
+            val pointVector = Vector3d(point).sub(startPoint)
+            val projection = pointVector.dot(gradientVector) / (gradientLength * gradientLength)
+            return startColor.lerp(endColor, projection)
         }
     }
 }
 
-/**
- * Represents one face of a 3D shape.
- */
 data class Face(
-    val normal: Vector3d,
-    val getPoint: (horizontalCoord: Double, verticalCoord: Double) -> Vector3d,
-    val gradient: ColorGradient = ColorGradient.solid(Color.WHITE)
-)
+    val points: List<Vector3d>,
+    val color: FaceColor = FaceColor.Solid(Color.WHITE)
+) {
+    val normal = Vector3d(points[1]).sub(points[0]).cross(Vector3d(points[2]).sub(points[0])).normalize()
 
-/**
- * Represents a 3D geometry composed of multiple faces.
- */
-data class Geometry(
-    val faces: List<Face>
-)
+    private val origin = points[0]
+    private val uAxis = run {
+        val arbitrary = if (kotlin.math.abs(normal.x) > 0.5) Vector3d(0.0, 1.0, 0.0) else Vector3d(1.0, 0.0, 0.0)
+        Vector3d(arbitrary).sub(Vector3d(normal).mul(arbitrary.dot(normal))).normalize()
+    }
+    private val vAxis = Vector3d(normal).cross(uAxis).normalize()
 
-/**
- * Predefined 3D geometries.
- */
+    private val projected2D = points.map { p ->
+        val rel = Vector3d(p).sub(origin)
+        Vector2d(rel.dot(uAxis), rel.dot(vAxis))
+    }
+
+    private val minX = projected2D.minOf { it.x }
+    private val maxX = projected2D.maxOf { it.x }
+    private val minY = projected2D.minOf { it.y }
+    private val maxY = projected2D.maxOf { it.y }
+
+    fun getPoint(normalizedX: Double, normalizedY: Double): Vector3d? {
+        // Map from normalized [-1,1] to actual face coordinate range
+        val faceX = minX + (normalizedX + 1.0) * (maxX - minX) / 2.0
+        val faceY = minY + (normalizedY + 1.0) * (maxY - minY) / 2.0
+
+        if (!pointInPolygon(faceX, faceY)) return null
+
+        return Vector3d(origin)
+            .add(Vector3d(uAxis).mul(faceX))
+            .add(Vector3d(vAxis).mul(faceY))
+    }
+
+    private fun pointInPolygon(testX: Double, testY: Double): Boolean {
+        var intersections = 0
+        for (i in projected2D.indices) {
+            val v1 = projected2D[i]
+            val v2 = projected2D[(i + 1) % projected2D.size]
+
+            if (v1.y == v2.y) continue
+            if (testY < min(v1.y, v2.y) || testY >= max(v1.y, v2.y)) continue
+
+            val xIntersect = v1.x + (testY - v1.y) * (v2.x - v1.x) / (v2.y - v1.y)
+            if (testX < xIntersect) intersections++
+        }
+        return intersections % 2 == 1
+    }
+}
+
+data class Geometry(val faces: List<Face>)
+
 object Geometries {
-
-    /**
-     * A unit cube with edges from -1 to 1.
-     */
     val cube = Geometry(
         faces = listOf(
-            // Front face (Z=1): Bottom-Left to Top-Right
+            // Front face (z=1) - CCW from outside
             Face(
-                normal = Vector3d(0.0, 0.0, 1.0),
-                getPoint = { h, v -> Vector3d(h, v, 1.0) },
-                gradient = ColorGradient(
-                    startCoord = Vector3d(-1.0, -1.0, 1.0),
-                    endCoord = Vector3d(1.0, 1.0, 1.0),
-                    startColor = Color.KOTLIN_BLUE,
-                    endColor = Color.KOTLIN_PURPLE
+                points = listOf(
+                    Vector3d(-1.0, -1.0, 1.0),
+                    Vector3d(1.0, -1.0, 1.0),
+                    Vector3d(1.0, 1.0, 1.0),
+                    Vector3d(-1.0, 1.0, 1.0)
+                ),
+                color = FaceColor.Solid(Color.WHITE)
+            ),
+            // Back face (z=-1) - CCW from outside (reversed)
+            Face(
+                points = listOf(
+                    Vector3d(1.0, -1.0, -1.0),
+                    Vector3d(-1.0, -1.0, -1.0),
+                    Vector3d(-1.0, 1.0, -1.0),
+                    Vector3d(1.0, 1.0, -1.0)
+                ),
+                color = FaceColor.Solid(Color.WHITE)
+            ),
+            // Top face (y=1) - CCW from outside
+            Face(
+                points = listOf(
+                    Vector3d(-1.0, 1.0, 1.0),
+                    Vector3d(1.0, 1.0, 1.0),
+                    Vector3d(1.0, 1.0, -1.0),
+                    Vector3d(-1.0, 1.0, -1.0)
+                ),
+                color = FaceColor.Solid(Color.WHITE)
+            ),
+            // Bottom face (y=-1) - CCW from outside (reversed)
+            Face(
+                points = listOf(
+                    Vector3d(-1.0, -1.0, -1.0),
+                    Vector3d(1.0, -1.0, -1.0),
+                    Vector3d(1.0, -1.0, 1.0),
+                    Vector3d(-1.0, -1.0, 1.0)
+                ),
+                color = FaceColor.Gradient(
+                    Vector3d(-1.0, -1.0, -1.0), Vector3d(1.0, -1.0, 1.0),
+                    Color.KOTLIN_BLUE, Color.KOTLIN_PURPLE
                 )
             ),
-
-            // Back face (Z=-1): Bottom-Left to Top-Right
+            // Right face (x=1) - CCW from outside
             Face(
-                normal = Vector3d(0.0, 0.0, -1.0),
-                getPoint = { h, v -> Vector3d(h, v, -1.0) },
-                gradient = ColorGradient(
-                    startCoord = Vector3d(-1.0, -1.0, -1.0),
-                    endCoord = Vector3d(1.0, 1.0, -1.0),
-                    startColor = Color.KOTLIN_BLUE,
-                    endColor = Color.KOTLIN_PURPLE
+                points = listOf(
+                    Vector3d(1.0, -1.0, 1.0),
+                    Vector3d(1.0, -1.0, -1.0),
+                    Vector3d(1.0, 1.0, -1.0),
+                    Vector3d(1.0, 1.0, 1.0)
+                ),
+                color = FaceColor.Gradient(
+                    Vector3d(1.0, -1.0, -1.0), Vector3d(1.0, 1.0, 1.0),
+                    Color.KOTLIN_BLUE, Color.KOTLIN_PURPLE
                 )
             ),
-
-            // Top face (Y=1): Front-Left to Back-Right
+            // Left face (x=-1) - CCW from outside (reversed)
             Face(
-                normal = Vector3d(0.0, 1.0, 0.0),
-                getPoint = { h, v -> Vector3d(h, 1.0, v) },
-                gradient = ColorGradient(
-                    startCoord = Vector3d(-1.0, 1.0, -1.0),
-                    endCoord = Vector3d(1.0, 1.0, 1.0),
-                    startColor = Color.KOTLIN_BLUE,
-                    endColor = Color.KOTLIN_PURPLE
-                )
-            ),
-
-            // Bottom face (Y=-1): Front-Left to Back-Right
-            Face(
-                normal = Vector3d(0.0, -1.0, 0.0),
-                getPoint = { h, v -> Vector3d(h, -1.0, v) },
-                gradient = ColorGradient(
-                    startCoord = Vector3d(-1.0, -1.0, -1.0),
-                    endCoord = Vector3d(1.0, -1.0, 1.0),
-                    startColor = Color.KOTLIN_BLUE,
-                    endColor = Color.KOTLIN_PURPLE
-                )
-            ),
-
-            // Right face (X=1): Bottom-Back to Top-Front
-            Face(
-                normal = Vector3d(1.0, 0.0, 0.0),
-                getPoint = { h, v -> Vector3d(1.0, h, v) },
-                gradient = ColorGradient(
-                    startCoord = Vector3d(1.0, -1.0, -1.0),
-                    endCoord = Vector3d(1.0, 1.0, 1.0),
-                    startColor = Color.KOTLIN_BLUE,
-                    endColor = Color.KOTLIN_PURPLE
-                )
-            ),
-
-            // Left face (X=-1): Bottom-Back to Top-Front
-            Face(
-                normal = Vector3d(-1.0, 0.0, 0.0),
-                getPoint = { h, v -> Vector3d(-1.0, h, v) },
-                gradient = ColorGradient(
-                    startCoord = Vector3d(-1.0, -1.0, -1.0),
-                    endCoord = Vector3d(-1.0, 1.0, 1.0),
-                    startColor = Color.KOTLIN_BLUE,
-                    endColor = Color.KOTLIN_PURPLE
+                points = listOf(
+                    Vector3d(-1.0, -1.0, -1.0),
+                    Vector3d(-1.0, -1.0, 1.0),
+                    Vector3d(-1.0, 1.0, 1.0),
+                    Vector3d(-1.0, 1.0, -1.0)
+                ),
+                color = FaceColor.Gradient(
+                    Vector3d(-1.0, -1.0, -1.0), Vector3d(-1.0, 1.0, 1.0),
+                    Color.KOTLIN_BLUE, Color.KOTLIN_PURPLE
                 )
             )
         )
     )
 
-    /**
-     * A triangular prism (cube with two opposite corners removed).
-     * Has 2 triangular faces (top-left and bottom-right removed) and 3 rectangular faces.
-     */
     val triangularPrism = Geometry(
         faces = listOf(
+            // Top triangle
             Face(
-                normal = Vector3d(0.0, 0.0, 1.0),
-                getPoint = { h, v ->
-                    if (v + h <= 0.0) Vector3d(h, v, 0.5)
-                    else Vector3d(0.0, 0.0, 100.0)
-                },
-                gradient = ColorGradient(
-                    startCoord = Vector3d(-1.0, -1.0, 0.5),
-                    endCoord = Vector3d(0.5, 0.5, 0.5),
-                    startColor = Color.KOTLIN_BLUE,
-                    endColor = Color.KOTLIN_PURPLE
+                points = listOf(
+                    Vector3d(0.0, 1.0, 0.25),
+                    Vector3d(-1.0, 1.0, 0.25),
+                    Vector3d(-1.0, 0.0, 0.25),
+                ),
+                color = FaceColor.Gradient(
+                    Vector3d(-1.0, 0.0, 0.25), Vector3d(0.0, 1.0, 0.25),
+                    Color.KOTLIN_BLUE, Color.KOTLIN_PURPLE
+                )
+            ),
+            Face(
+                points = listOf(
+                    Vector3d(-1.0, 0.0, -0.25),
+                    Vector3d(-1.0, 1.0, -0.25),
+                    Vector3d(0.0, 1.0, -0.25),
+                ),
+                color = FaceColor.Gradient(
+                    Vector3d(-1.0, 0.0, -0.5), Vector3d(0.0, 1.0, -0.25),
+                    Color.KOTLIN_BLUE, Color.KOTLIN_PURPLE
+                )
+            ),
+            Face(
+                points = listOf(
+                    Vector3d(-1.0, 0.0, 0.25),
+                    Vector3d(-1.0, 1.0, 0.25),
+                    Vector3d(-1.0, 1.0, -0.25),
+                    Vector3d(-1.0, 0.0, -0.25)
+                ),
+                color = FaceColor.Gradient(
+                    Vector3d(-1.0, 0.0, 0.0), Vector3d(-1.0, 2.0, 0.0),
+                    Color.KOTLIN_BLUE, Color.KOTLIN_PURPLE
+                )
+            ),
+            Face(
+                points = listOf(
+                    Vector3d(-1.0, 1.0, 0.25),
+                    Vector3d(0.0, 1.0, 0.25),
+                    Vector3d(0.0, 1.0, -0.25),
+                    Vector3d(-1.0, 1.0, -0.25)
+                ),
+                color = FaceColor.Gradient(
+                    Vector3d(-1.0, 1.0, 0.0), Vector3d(1.0, 1.0, 0.0),
+                    Color.KOTLIN_BLUE, Color.KOTLIN_PURPLE
                 )
             ),
 
-            // Back triangular face (Now at z = -0.5)
+            // Orange rectangle
             Face(
-                normal = Vector3d(0.0, 0.0, -1.0),
-                getPoint = { h, v ->
-                    if (v + h <= 0.0) Vector3d(h, v, -0.5)
-                    else Vector3d(0.0, 0.0, 100.0)
-                },
-                gradient = ColorGradient.solid(Color.WHITE)
-            ),
-
-            // Bottom rectangular face (y = -1, z scaled to [-0.5, 0.5])
-            Face(
-                normal = Vector3d(0.0, -1.0, 0.0),
-                getPoint = { h, v -> Vector3d(h, -1.0, v * 0.5) },
-                gradient = ColorGradient.solid(Color.WHITE)
-            ),
-
-            // Left rectangular face (x = -1, z scaled to [-0.5, 0.5])
-            Face(
-                normal = Vector3d(-1.0, 0.0, 0.0),
-                getPoint = { h, v -> Vector3d(-1.0, h, v * 0.5) },
-                gradient = ColorGradient.solid(Color.WHITE)
-            ),
-
-            // Diagonal face (Hypotenuse)
-            Face(
-                normal = Vector3d(1.0, 1.0, 0.0).normalize(),
-                getPoint = { h, v ->
-                    val x = h           // x: -1 to 1
-                    val y = -h          // y: 1 to -1
-                    val z = v * 0.5     // z scaled: -0.5 to 0.5
-                    Vector3d(x, y, z)
-                },
-                gradient = ColorGradient(
-                    // Update gradient end-points to match new Z depth
-                    startCoord = Vector3d(-1.0, 1.0, -0.5),
-                    endCoord = Vector3d(1.0, -1.0, 0.5),
-                    startColor = Color.KOTLIN_BLUE,
-                    endColor = Color.KOTLIN_PURPLE
+                points = listOf(
+                    Vector3d(-1.0, 0.0, 0.25),
+                    Vector3d(-1.0, -1.0, 0.25),
+                    Vector3d(1.0, 1.0, 0.25),
+                    Vector3d(0.0, 1.0, 0.25),
+                ),
+                color = FaceColor.Gradient(
+                    Vector3d(-1.0, -1.0, 0.25), Vector3d(1.0, 1.0, 0.25),
+                    Color.KOTLIN_PINK, Color.KOTLIN_ORANGE
                 )
-            )
+            ),
+            Face(
+                points = listOf(
+                    Vector3d(-1.0, -1.0, -0.25),
+                    Vector3d(-1.0, 0.0, -0.25),
+                    Vector3d(0.0, 1.0, -0.25),
+                    Vector3d(1.0, 1.0, -0.25)
+                ),
+                color = FaceColor.Gradient(
+                    Vector3d(-1.0, -1.0, -0.25), Vector3d(1.0, 1.0, -0.25),
+                    Color.KOTLIN_PINK, Color.KOTLIN_ORANGE
+                )
+            ),
+            Face(
+                points = listOf(
+                    Vector3d(-1.0, -1.0, 0.25),
+                    Vector3d(-1.0, 0.0, 0.25),
+                    Vector3d(-1.0, 0.0, -0.25),
+                    Vector3d(-1.0, -1.0, -0.25),
+                ),
+                color = FaceColor.Gradient(
+                    Vector3d(-1.0, -1.0, 0.0), Vector3d(-1.0, 1.0, 0.0),
+                    Color.KOTLIN_PINK, Color.KOTLIN_ORANGE
+                )
+            ),
+            Face(
+                points = listOf(
+                    Vector3d(0.0, 1.0, -0.25),
+                    Vector3d(0.0, 1.0, 0.25),
+                    Vector3d(1.0, 1.0, 0.25),
+                    Vector3d(1.0, 1.0, -0.25),
+                ),
+                color = FaceColor.Gradient(
+                    Vector3d(-1.0, 1.0, 0.0), Vector3d(1.0, 1.0, 0.0),
+                    Color.KOTLIN_PINK, Color.KOTLIN_ORANGE
+                )
+            ),
+            Face(
+                points = listOf(
+                    Vector3d(0.0, 0.0, 0.25),
+                    Vector3d(0.0, 0.0, -0.25),
+                    Vector3d(1.0, 1.0, -0.25),
+                    Vector3d(1.0, 1.0, 0.25),
+                ),
+                color = FaceColor.Gradient(
+                    Vector3d(-1.0, -1.0, 0.0), Vector3d(1.0, 1.0, 0.0),
+                    Color.KOTLIN_PINK, Color.KOTLIN_ORANGE
+                )
+            ),
+
+            // Bottom triangle
+            Face(
+                points = listOf(
+                    Vector3d(1.0, -1.0, 0.25),
+                    Vector3d(0.0, 0.0, 0.25),
+                    Vector3d(-1.0, -1.0, 0.25),
+                ),
+                color = FaceColor.Gradient(
+                    Vector3d(-1.0, -1.0, 0.25), Vector3d(0.0, 0.0, 0.25),
+                    Color.KOTLIN_BLUE, Color.KOTLIN_PURPLE
+                )
+            ),
+            Face(
+                points = listOf(
+                    Vector3d(-1.0, -1.0, -0.25),
+                    Vector3d(0.0, 0.0, -0.25),
+                    Vector3d(1.0, -1.0, -0.25),
+                ),
+                color = FaceColor.Gradient(
+                    Vector3d(-1.0, -1.0, -0.25), Vector3d(0.0, 0.0, -0.25),
+                    Color.KOTLIN_BLUE, Color.KOTLIN_PURPLE
+                )
+            ),
+            Face(
+                points = listOf(
+                    Vector3d(-1.0, -1.0, -0.25),
+                    Vector3d(1.0, -1.0, -0.25),
+                    Vector3d(1.0, -1.0, 0.25),
+                    Vector3d(-1.0, -1.0, 0.25),
+                ),
+                color = FaceColor.Gradient(
+                    Vector3d(-1.0, -1.0, 0.0), Vector3d(1.0, -1.0, 0.0),
+                    Color.KOTLIN_BLUE, Color.KOTLIN_PURPLE
+                )
+            ),
+            Face(
+                points = listOf(
+                    Vector3d(1.0, -1.0, -0.25),
+                    Vector3d(0.0, 0.0, -0.25),
+                    Vector3d(0.0, 0.0, 0.25),
+                    Vector3d(1.0, -1.0, 0.25),
+                ),
+                color = FaceColor.Solid(Color.KOTLIN_PURPLE)
+            ),
         )
     )
 }

@@ -40,22 +40,16 @@ class Renderer(
             while (horizontalCoord <= 1.0) {
                 val point = face.getPoint(horizontalCoord, verticalCoord)
 
-                // Skip points that are pushed far away (triangular face masking)
-                if (point.z > 50.0 || point.z < -50.0) {
-                    horizontalCoord += samplingStep
-                    continue
+                if (point != null) {
+                    renderPoint(
+                        point,
+                        face.normal,
+                        face.color,
+                        angleX,
+                        angleY
+                    )
                 }
 
-                // Pass the raw horizontal/vertical coords to help the gradient calculation
-                renderPoint(
-                    point,
-                    horizontalCoord,
-                    verticalCoord,
-                    face.normal,
-                    face.gradient,
-                    angleX,
-                    angleY
-                )
                 horizontalCoord += samplingStep
             }
             verticalCoord += samplingStep
@@ -64,10 +58,8 @@ class Renderer(
 
     private fun renderPoint(
         point: Vector3d,
-        h: Double, // Local horizontal
-        v: Double, // Local vertical
         normal: Vector3d,
-        gradient: ColorGradient,
+        faceColor: FaceColor,
         angleX: Double,
         angleY: Double
     ) {
@@ -75,11 +67,8 @@ class Renderer(
         val rotatedPoint = Rotation.rotateXY(point, angleX, angleY)
         val rotatedNormal = Rotation.rotateXY(normal, angleX, angleY)
 
-        // STEP 2: COLOR - Calculate color based on local face coordinates
-        // We reconstruct a 2D point from our loop variables (h, v) to ensure
-        // the gradient math in ColorGradient.getColorAt works regardless of 3D orientation.
-        // We use the 'point' to stay compatible with your current getColorAt(Vector3d) signature.
-        val color = gradient.getColorAt(point)
+        // STEP 2: COLOR - Calculate color based on 3D point position
+        val color = faceColor.getColorAt(point)
 
         // STEP 3: LIGHTING - Calculate brightness
         val brightness = light.calculateDiffuseLighting(rotatedPoint, rotatedNormal)

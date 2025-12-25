@@ -1,6 +1,7 @@
 package com.app
 
 import org.joml.Vector3d
+import kotlin.math.roundToInt
 
 /**
  * Configuration for perspective projection.
@@ -52,8 +53,8 @@ class Projector(private val config: ProjectionConfig) {
     fun project(point: Vector3d): ProjectedPoint? {
         val ooz = 1.0 / (point.z + config.zOffset)
 
-        val xScreen = (config.screenWidth / 2 + point.x * config.scaleX * ooz).toInt()
-        val yScreen = (config.screenHeight / 2 + point.y * config.scaleY * ooz).toInt()
+        val xScreen = (config.screenWidth / 2 + point.x * config.scaleX * ooz).roundToInt()
+        val yScreen = (config.screenHeight / 2 - point.y * config.scaleY * ooz).roundToInt()
 
         return if (xScreen in 0 until config.screenWidth &&
             yScreen in 0 until config.screenHeight) {

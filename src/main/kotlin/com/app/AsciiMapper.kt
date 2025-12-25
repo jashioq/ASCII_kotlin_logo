@@ -49,9 +49,9 @@ object AsciiMapper {
         val colorMultiplier = config.minColorBrightness + (1.0 - config.minColorBrightness) * brightness
 
         // Apply color multiplier to RGB
-        val r = (color.r * colorMultiplier * 255).toInt().coerceIn(0, 255)
-        val g = (color.g * colorMultiplier * 255).toInt().coerceIn(0, 255)
-        val b = (color.b * colorMultiplier * 255).toInt().coerceIn(0, 255)
+        val r = (color.r * colorMultiplier).toInt().coerceIn(0, 255)
+        val g = (color.g * colorMultiplier).toInt().coerceIn(0, 255)
+        val b = (color.b * colorMultiplier).toInt().coerceIn(0, 255)
 
         // ANSI 24-bit true color: \u001b[38;2;R;G;Bm
         return "\u001b[38;2;${r};${g};${b}m$char\u001b[0m"
