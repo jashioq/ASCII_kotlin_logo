@@ -1,4 +1,6 @@
-package com.app
+package com.app.rendering
+
+import com.app.geometry.Color
 
 /**
  * Configuration for ASCII rendering with colors.

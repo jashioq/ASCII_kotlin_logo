@@ -1,5 +1,11 @@
 package com.app
 
+import com.app.config.Configuration
+import com.app.geometry.shapes.KotlinLogo
+import com.app.lighting.PointLight
+import com.app.math.ProjectionConfig
+import com.app.rendering.RenderConfig
+import com.app.rendering.Renderer
 import com.github.ajalt.mordant.terminal.Terminal
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
@@ -8,8 +14,7 @@ import org.joml.Vector3d
 fun main() = runBlocking {
     val terminal = Terminal()
 
-    // Choose geometry to render (swap between Geometries.cube and Geometries.triangularPrism)
-    val geometry = Geometries.kotlinLogo
+    val geometry = KotlinLogo.geometry
 
     val light =
             PointLight(

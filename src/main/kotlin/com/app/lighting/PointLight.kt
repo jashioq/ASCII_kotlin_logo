@@ -1,4 +1,4 @@
-package com.app
+package com.app.lighting
 
 import org.joml.Vector3d
 

@@ -1,4 +1,4 @@
-package com.app
+package com.app.config
 
 object Configuration {
     // Lighting
@@ -10,7 +10,7 @@ object Configuration {
     // Animation
     const val SPEED_A = 0.02
     const val SPEED_B = 0.012
-    const val FRAME_DELAY_MS = 8L // ~120 FPS
+    const val FRAME_DELAY_MS = 8L //8L is 120fps, 16L is 60fps
 
     // Projection
     const val Z_OFFSET = 5.0

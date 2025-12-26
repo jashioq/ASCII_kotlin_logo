@@ -1,4 +1,4 @@
-package com.app
+package com.app.rendering
 
 /**
  * Manages the 2D screen buffer with Z-buffering for depth testing.

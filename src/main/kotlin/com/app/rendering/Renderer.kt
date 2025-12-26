@@ -1,6 +1,13 @@
-package com.app
+package com.app.rendering
 
-import com.app.FrameBuffer
+import com.app.config.Configuration
+import com.app.geometry.Face
+import com.app.geometry.FaceColor
+import com.app.geometry.Geometry
+import com.app.lighting.PointLight
+import com.app.math.Projector
+import com.app.math.ProjectionConfig
+import com.app.math.Rotation
 import org.joml.Vector3d
 
 /**
