@@ -6,9 +6,9 @@ import com.app.geometry.Color
  * Configuration for ASCII rendering with colors.
  *
  * @param minColorBrightness Minimum brightness multiplier for colors [0, 1].
- *                           0.0 = colors can go completely black when unlit
- *                           0.5 = colors stay at least 50% bright even when unlit
- *                           1.0 = colors never darken (only character density changes)
+ * 0.0 = colors can go completely black when unlit
+ * 0.5 = colors stay at least 50% bright even when unlit
+ * 1.0 = colors never darken (only character density changes)
  */
 data class RenderConfig(
     val minColorBrightness: Double = 0.5
@@ -46,8 +46,8 @@ object AsciiMapper {
         val char = brightnessToChar(brightness)
 
         // Map brightness to color multiplier within [minColorBrightness, 1.0]
-        // brightness=0.0 → minColorBrightness
-        // brightness=1.0 → 1.0
+        // brightness=0.0 -> minColorBrightness
+        // brightness=1.0 -> 1.0
         val colorMultiplier = config.minColorBrightness + (1.0 - config.minColorBrightness) * brightness
 
         // Apply color multiplier to RGB

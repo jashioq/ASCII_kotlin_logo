@@ -7,7 +7,11 @@ import com.app.math.ProjectionConfig
 import com.app.rendering.RenderConfig
 import com.app.rendering.Renderer
 import com.github.ajalt.mordant.terminal.Terminal
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.channels.Channel
 import org.joml.Vector3d
 

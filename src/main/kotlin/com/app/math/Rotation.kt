@@ -14,11 +14,11 @@ object Rotation {
      * This creates the tumbling motion of the cube.
      *
      * Rotation matrices:
-     * Rx(θ): [1, 0, 0; 0, cos(θ), -sin(θ); 0, sin(θ), cos(θ)]
-     * Ry(θ): [cos(θ), 0, sin(θ); 0, 1, 0; -sin(θ), 0, cos(θ)]
+     * Rx(theta): [1, 0, 0; 0, cos(theta), -sin(theta); 0, sin(theta), cos(theta)]
+     * Ry(theta): [cos(theta), 0, sin(theta); 0, 1, 0; -sin(theta), 0, cos(theta)]
      */
-    fun rotateXY(v: Vector3d, angleX: Double, angleY: Double): Vector3d {
-        return Vector3d(v)
+    fun rotateXY(vector: Vector3d, angleX: Double, angleY: Double): Vector3d {
+        return Vector3d(vector)
             .rotateX(angleX)
             .rotateY(angleY)
     }

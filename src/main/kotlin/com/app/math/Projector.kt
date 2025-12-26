@@ -7,10 +7,10 @@ import kotlin.math.roundToInt
  * Configuration for perspective projection.
  *
  * @param zOffset Camera distance from origin. Prevents division by zero and controls
- *                how close objects can get before clipping. Larger values = camera further back.
+ * how close objects can get before clipping. Larger values = camera further back.
  * @param scaleX Horizontal field of view scaling. Larger values = narrower FOV = more zoomed in.
- *               Controls how much of the X-axis fits on screen. scaleY is automatically set to
- *               scaleX/2 to compensate for terminal character aspect ratio (2:1 height:width).
+ * Controls how much of the X-axis fits on screen. scaleY is automatically set to
+ * scaleX/2 to compensate for terminal character aspect ratio (2:1 height:width).
  * @param screenWidth Width of the terminal in characters.
  * @param screenHeight Height of the terminal in characters.
  */
@@ -42,13 +42,13 @@ class Projector(private val config: ProjectionConfig) {
      *
      * Steps:
      * 1. Calculate oneOverZ = 1/(z + offset) for perspective division
-     * 2. Scale world coordinates by oneOverZ (closer objects appear larger)
-     * 3. Apply FOV scaling and center on screen
-     * 4. Check bounds
+     * 2. Multiply world X and Y coordinates by oneOverZ (closer objects appear larger)
+     * 3. Apply field-of-view scaling (scaleX, scaleY) and center the result on screen
+     * 4. Check if the resulting screen coordinates are within bounds, return null if outside
      *
      * The division by (z + offset) creates the perspective effect:
-     * - Far objects (large z) → small oneOverZ → coordinates near center → appear small
-     * - Near objects (small z) → large oneOverZ → coordinates far from center → appear large
+     * - Far objects (large z) -> small oneOverZ -> coordinates near center -> appear small
+     * - Near objects (small z) -> large oneOverZ -> coordinates far from center -> appear large
      */
     fun project(point: Vector3d): ProjectedPoint? {
         val oneOverZ = 1.0 / (point.z + config.zOffset)

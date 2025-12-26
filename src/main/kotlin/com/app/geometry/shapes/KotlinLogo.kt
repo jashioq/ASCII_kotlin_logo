@@ -1,6 +1,9 @@
 package com.app.geometry.shapes
 
-import com.app.geometry.*
+import com.app.geometry.Color
+import com.app.geometry.Face
+import com.app.geometry.FaceColor
+import com.app.geometry.Geometry
 import org.joml.Vector3d
 
 object KotlinLogo {
