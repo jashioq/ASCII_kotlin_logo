@@ -9,14 +9,14 @@ fun main() = runBlocking {
     val terminal = Terminal()
 
     // Choose geometry to render (swap between Geometries.cube and Geometries.triangularPrism)
-    val geometry = Geometries.triangularPrism
+    val geometry = Geometries.kotlinLogo
 
     val light =
             PointLight(
                     Vector3d(
-                            1.0 * Configuration.LIGHT_DISTANCE,
-                            1.0 * Configuration.LIGHT_DISTANCE,
-                            -1.0 * Configuration.LIGHT_DISTANCE
+                            Configuration.LIGHT_X * Configuration.LIGHT_DISTANCE,
+                            Configuration.LIGHT_Y * Configuration.LIGHT_DISTANCE,
+                            Configuration.LIGHT_Z * Configuration.LIGHT_DISTANCE
                     )
             )
 

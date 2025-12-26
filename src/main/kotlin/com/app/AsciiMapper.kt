@@ -17,7 +17,7 @@ data class RenderConfig(
  */
 object AsciiMapper {
 
-    private const val RAMP = ".,-~:;=!*#\$@"
+    private const val ASCII_BRIGHTNESS_RAMP = ".,-~:;=!*#\$@"
 
     /**
      * Convert brightness [0, 1] to ASCII character.
@@ -25,8 +25,8 @@ object AsciiMapper {
      */
     fun brightnessToChar(brightness: Double): Char {
         val clamped = brightness.coerceIn(0.0, 1.0)
-        val index = (clamped * (RAMP.length - 1)).toInt()
-        return RAMP[index]
+        val index = (clamped * (ASCII_BRIGHTNESS_RAMP.length - 1)).toInt()
+        return ASCII_BRIGHTNESS_RAMP[index]
     }
 
     /**

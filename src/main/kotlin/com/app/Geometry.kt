@@ -4,21 +4,20 @@ import org.joml.Vector3d
 import kotlin.math.min
 import kotlin.math.max
 
-data class Color(val r: Double, val g: Double, val b: Double) {
+data class Color(val r: Int, val g: Int, val b: Int) {
     companion object {
-        val WHITE = Color(255.0, 255.0, 255.0)
-        val KOTLIN_BLUE = Color(7.0, 174.0, 255.0)
-        val KOTLIN_PURPLE = Color(148.0, 93.0, 255.0)
-        val KOTLIN_PINK = Color(199.0, 87.0, 188.0)
-        val KOTLIN_ORANGE = Color(254.0, 137.0, 2.0)
+        val KOTLIN_BLUE = Color(7, 174, 255)
+        val KOTLIN_PURPLE = Color(148, 93, 255)
+        val KOTLIN_PINK = Color(199, 87, 188)
+        val KOTLIN_ORANGE = Color(254, 137, 2)
     }
 
     fun lerp(other: Color, t: Double): Color {
         val clampedT = t.coerceIn(0.0, 1.0)
         return Color(
-            r + (other.r - r) * clampedT,
-            g + (other.g - g) * clampedT,
-            b + (other.b - b) * clampedT
+            (r + (other.r - r) * clampedT).toInt(),
+            (g + (other.g - g) * clampedT).toInt(),
+            (b + (other.b - b) * clampedT).toInt()
         )
     }
 }
@@ -52,7 +51,7 @@ sealed interface FaceColor {
 
 data class Face(
     val points: List<Vector3d>,
-    val color: FaceColor = FaceColor.Solid(Color.WHITE)
+    val color: FaceColor = FaceColor.Solid(Color.KOTLIN_BLUE)
 ) {
     val normal = Vector3d(points[1]).sub(points[0]).cross(Vector3d(points[2]).sub(points[0])).normalize()
 
@@ -104,66 +103,7 @@ data class Face(
 data class Geometry(val faces: List<Face>)
 
 object Geometries {
-    val cube = Geometry(
-        faces = listOf(
-            Face(
-                points = listOf(
-                    Vector3d(-1.0, -1.0, 1.0),
-                    Vector3d(1.0, -1.0, 1.0),
-                    Vector3d(1.0, 1.0, 1.0),
-                    Vector3d(-1.0, 1.0, 1.0)
-                ),
-                color = FaceColor.Solid(Color.WHITE)
-            ),
-            Face(
-                points = listOf(
-                    Vector3d(1.0, -1.0, -1.0),
-                    Vector3d(-1.0, -1.0, -1.0),
-                    Vector3d(-1.0, 1.0, -1.0),
-                    Vector3d(1.0, 1.0, -1.0)
-                ),
-                color = FaceColor.Solid(Color.WHITE)
-            ),
-            Face(
-                points = listOf(
-                    Vector3d(-1.0, 1.0, 1.0),
-                    Vector3d(1.0, 1.0, 1.0),
-                    Vector3d(1.0, 1.0, -1.0),
-                    Vector3d(-1.0, 1.0, -1.0)
-                ),
-                color = FaceColor.Solid(Color.WHITE)
-            ),
-            Face(
-                points = listOf(
-                    Vector3d(-1.0, -1.0, -1.0),
-                    Vector3d(1.0, -1.0, -1.0),
-                    Vector3d(1.0, -1.0, 1.0),
-                    Vector3d(-1.0, -1.0, 1.0)
-                ),
-                color = FaceColor.Solid(Color.WHITE)
-            ),
-            Face(
-                points = listOf(
-                    Vector3d(1.0, -1.0, 1.0),
-                    Vector3d(1.0, -1.0, -1.0),
-                    Vector3d(1.0, 1.0, -1.0),
-                    Vector3d(1.0, 1.0, 1.0)
-                ),
-                color = FaceColor.Solid(Color.WHITE)
-            ),
-            Face(
-                points = listOf(
-                    Vector3d(-1.0, -1.0, -1.0),
-                    Vector3d(-1.0, -1.0, 1.0),
-                    Vector3d(-1.0, 1.0, 1.0),
-                    Vector3d(-1.0, 1.0, -1.0)
-                ),
-                color = FaceColor.Solid(Color.WHITE)
-            )
-        )
-    )
-
-    val triangularPrism = Geometry(
+    val kotlinLogo = Geometry(
         faces = listOf(
             // Top triangle
             Face(

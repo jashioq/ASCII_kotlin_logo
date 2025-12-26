@@ -41,24 +41,24 @@ class Projector(private val config: ProjectionConfig) {
      * Project a 3D point to 2D screen coordinates with perspective.
      *
      * Steps:
-     * 1. Calculate ooz = 1/(z + offset) for perspective division
-     * 2. Scale world coordinates by ooz (closer objects appear larger)
+     * 1. Calculate oneOverZ = 1/(z + offset) for perspective division
+     * 2. Scale world coordinates by oneOverZ (closer objects appear larger)
      * 3. Apply FOV scaling and center on screen
      * 4. Check bounds
      *
      * The division by (z + offset) creates the perspective effect:
-     * - Far objects (large z) → small ooz → coordinates near center → appear small
-     * - Near objects (small z) → large ooz → coordinates far from center → appear large
+     * - Far objects (large z) → small oneOverZ → coordinates near center → appear small
+     * - Near objects (small z) → large oneOverZ → coordinates far from center → appear large
      */
     fun project(point: Vector3d): ProjectedPoint? {
-        val ooz = 1.0 / (point.z + config.zOffset)
+        val oneOverZ = 1.0 / (point.z + config.zOffset)
 
-        val xScreen = (config.screenWidth / 2 + point.x * config.scaleX * ooz).roundToInt()
-        val yScreen = (config.screenHeight / 2 - point.y * config.scaleY * ooz).roundToInt()
+        val xScreen = (config.screenWidth / 2 + point.x * config.scaleX * oneOverZ).roundToInt()
+        val yScreen = (config.screenHeight / 2 - point.y * config.scaleY * oneOverZ).roundToInt()
 
         return if (xScreen in 0 until config.screenWidth &&
             yScreen in 0 until config.screenHeight) {
-            ProjectedPoint(xScreen, yScreen, ooz)
+            ProjectedPoint(xScreen, yScreen, oneOverZ)
         } else {
             null
         }

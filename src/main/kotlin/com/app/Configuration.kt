@@ -3,6 +3,9 @@ package com.app
 object Configuration {
     // Lighting
     const val LIGHT_DISTANCE = 10000.0
+    const val LIGHT_X = 1.0
+    const val LIGHT_Y = 1.0
+    const val LIGHT_Z = -1.0
 
     // Animation
     const val SPEED_A = 0.02
@@ -17,4 +20,5 @@ object Configuration {
 
     // Rendering
     const val MIN_COLOR_BRIGHTNESS = 0.85
+    const val SAMPLING_STEP = 0.025
 }

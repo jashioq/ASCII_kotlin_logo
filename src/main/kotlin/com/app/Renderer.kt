@@ -1,6 +1,6 @@
 package com.app
 
-import FrameBuffer
+import com.app.FrameBuffer
 import org.joml.Vector3d
 
 /**
@@ -11,7 +11,7 @@ class Renderer(
     private val config: ProjectionConfig,
     private val light: PointLight,
     private val renderConfig: RenderConfig = RenderConfig(),
-    private val samplingStep: Double = 0.025
+    private val samplingStep: Double = Configuration.SAMPLING_STEP
 ) {
 
     private val projector = Projector(config)
