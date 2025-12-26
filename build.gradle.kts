@@ -17,7 +17,6 @@ dependencies {
     implementation(kotlin("stdlib-jdk8"))
     // mine
     implementation("com.github.ajalt.mordant:mordant:3.0.2")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
     implementation("org.joml:joml:1.10.5")
 }
 
