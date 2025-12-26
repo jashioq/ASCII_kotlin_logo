@@ -3,13 +3,13 @@ package com.app.config
 object Configuration {
     // Lighting
     const val LIGHT_DISTANCE = 10000.0
-    const val LIGHT_X = 1.0
-    const val LIGHT_Y = 1.0
-    const val LIGHT_Z = -1.0
+    const val LIGHT_DIRECTION_X = 1.0
+    const val LIGHT_DIRECTION_Y = 1.0
+    const val LIGHT_DIRECTION_Z = -1.0
 
     // Animation
-    const val SPEED_A = 0.02
-    const val SPEED_B = 0.012
+    const val ROTATION_SPEED_X = 0.02
+    const val ROTATION_SPEED_Y = 0.012
     const val FRAME_DELAY_MS = 8L //8L is 120fps, 16L is 60fps
 
     // Projection

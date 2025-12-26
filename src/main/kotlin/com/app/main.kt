@@ -13,9 +13,9 @@ fun main() {
 
     val light = PointLight(
         Vector3d(
-            Configuration.LIGHT_X * Configuration.LIGHT_DISTANCE,
-            Configuration.LIGHT_Y * Configuration.LIGHT_DISTANCE,
-            Configuration.LIGHT_Z * Configuration.LIGHT_DISTANCE
+            Configuration.LIGHT_DIRECTION_X * Configuration.LIGHT_DISTANCE,
+            Configuration.LIGHT_DIRECTION_Y * Configuration.LIGHT_DISTANCE,
+            Configuration.LIGHT_DIRECTION_Z * Configuration.LIGHT_DISTANCE
         )
     )
 
@@ -51,8 +51,8 @@ fun main() {
         print("\u001B[${Configuration.SCREEN_HEIGHT}A\r")
         print(frame)
 
-        angleX += Configuration.SPEED_A
-        angleY += Configuration.SPEED_B
+        angleX += Configuration.ROTATION_SPEED_X
+        angleY += Configuration.ROTATION_SPEED_Y
 
         Thread.sleep(Configuration.FRAME_DELAY_MS)
     }
