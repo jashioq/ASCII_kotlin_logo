@@ -16,7 +16,6 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter")
     implementation(kotlin("stdlib-jdk8"))
     // mine
-    implementation("com.github.ajalt.mordant:mordant:3.0.2")
     implementation("org.joml:joml:1.10.5")
 }
 

@@ -6,12 +6,9 @@ import com.app.lighting.PointLight
 import com.app.math.ProjectionConfig
 import com.app.rendering.RenderConfig
 import com.app.rendering.Renderer
-import com.github.ajalt.mordant.terminal.Terminal
 import org.joml.Vector3d
 
 fun main() {
-    val terminal = Terminal()
-
     val geometry = KotlinLogo.geometry
 
     val light = PointLight(
@@ -36,7 +33,13 @@ fun main() {
         renderConfig = RenderConfig(minColorBrightness = Configuration.MIN_COLOR_BRIGHTNESS)
     )
 
-    terminal.cursor.hide(showOnExit = true)
+    // Hide cursor using ANSI escape code
+    print("\u001B[?25l")
+
+    // Add shutdown hook to show cursor on exit
+    Runtime.getRuntime().addShutdownHook(Thread {
+        print("\u001B[?25h")
+    })
 
     var angleX = 0.0
     var angleY = 0.0
@@ -44,11 +47,9 @@ fun main() {
     while (true) {
         val frame = renderer.renderFrame(angleX, angleY)
 
-        terminal.cursor.move {
-            up(Configuration.SCREEN_HEIGHT)
-            startOfLine()
-        }
-        terminal.print(frame)
+        // Move cursor up and to start of line using ANSI escape codes
+        print("\u001B[${Configuration.SCREEN_HEIGHT}A\r")
+        print(frame)
 
         angleX += Configuration.SPEED_A
         angleY += Configuration.SPEED_B
