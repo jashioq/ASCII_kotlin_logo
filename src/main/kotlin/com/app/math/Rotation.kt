@@ -45,9 +45,9 @@ object Rotation {
         val sinAngle = sin(angle)
 
         val rotationMatrix = Matrix3d(
-            1.0, 0.0,      0.0,
+            1.0, 0.0, 0.0,
             0.0, cosAngle, -sinAngle,
-            0.0, sinAngle,  cosAngle
+            0.0, sinAngle, cosAngle
         )
 
         return rotationMatrix.transform(Vector3d(vector))
@@ -70,8 +70,8 @@ object Rotation {
         val sinAngle = sin(angle)
 
         val rotationMatrix = Matrix3d(
-            cosAngle,  0.0, sinAngle,
-            0.0,       1.0, 0.0,
+            cosAngle, 0.0, sinAngle,
+            0.0, 1.0, 0.0,
             -sinAngle, 0.0, cosAngle
         )
 
