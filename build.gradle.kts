@@ -4,8 +4,8 @@ plugins {
     application
 }
 
-group = "org.example"
-version = "1.0-SNAPSHOT"
+group = "com.app"
+version = "1.0"
 
 repositories {
     mavenCentral()
@@ -21,24 +21,4 @@ dependencies {
 
 application {
     mainClass.set("com/app/MainKt")
-}
-
-tasks.test {
-    useJUnitPlatform()
-}
-
-kotlin {
-    jvmToolchain(21)
-}
-
-java {
-    toolchain {
-        languageVersion.set(JavaLanguageVersion.of(21))
-    }
-}
-
-tasks.withType<JavaExec> {
-    standardInput = System.`in`
-    standardOutput = System.out
-    systemProperty("kotlin.daemon.jvm.options", "-Dfile.encoding=UTF-8")
 }
