@@ -16,7 +16,7 @@ Build and run:
 Customize the rendering by editing [Configuration.kt](src/main/kotlin/com/app/config/Configuration.kt):
 
 **Terminal Size:**
-- `SCREEN_WIDTH` - Terminal width in characters (default: 180)
+- `SCREEN_WIDTH` - Terminal width in characters (default: 150)
 - `SCREEN_HEIGHT` - Terminal height in characters (default: 50)
 
 **Frame Rate:**
@@ -42,7 +42,9 @@ This renderer transforms 3D geometry into colored ASCII art through a multi-stag
 
 **The Surface Normal** tells us which direction the triangle is facing (imagine an arrow perpendicular to the surface):
 
-$$\mathbf{n} = \frac{(\mathbf{v}_1 - \mathbf{v}_0) \times (\mathbf{v}_2 - \mathbf{v}_0)}{||(\mathbf{v}_1 - \mathbf{v}_0) \times (\mathbf{v}_2 - \mathbf{v}_0)||}$$
+```math
+\mathbf{n} = \frac{(\mathbf{v}_1 - \mathbf{v}_0) \times (\mathbf{v}_2 - \mathbf{v}_0)}{||(\mathbf{v}_1 - \mathbf{v}_0) \times (\mathbf{v}_2 - \mathbf{v}_0)||}
+```
 
 The cross product $\times$ creates a vector perpendicular to both edges, and we normalize it to unit length.
 
@@ -73,15 +75,21 @@ Our triangle has a color gradient from **red** $\text{RGB}(255, 0, 0)$ at point 
 
 Define the gradient direction vector:
 
-$$\mathbf{g} = \mathbf{p}_{end} - \mathbf{p}_{start}$$
+```math
+\mathbf{g} = \mathbf{p}_{end} - \mathbf{p}_{start}
+```
 
 **Project the point onto the gradient:** This tells us "how far along" the gradient we are (0 = start, 1 = end):
 
-$$t = \frac{(\mathbf{p} - \mathbf{p}_{start}) \cdot \mathbf{g}}{||\mathbf{g}||^2}$$
+```math
+t = \frac{(\mathbf{p} - \mathbf{p}_{start}) \cdot \mathbf{g}}{||\mathbf{g}||^2}
+```
 
 **Blend the colors** using linear interpolation (lerp):
 
-$$C(\mathbf{p}) = C_{start} + t(C_{end} - C_{start})$$
+```math
+C(\mathbf{p}) = C_{start} + t(C_{end} - C_{start})
+```
 
 <details>
 <summary>📊 Example calculation</summary>
@@ -102,15 +110,21 @@ To animate the spinning, we apply **rotation matrices** to both the point and it
 
 **X-axis rotation** (pitch):
 
-$$R_x(\theta_x) = \begin{bmatrix} 1 & 0 & 0 \\ 0 & \cos\theta_x & -\sin\theta_x \\ 0 & \sin\theta_x & \cos\theta_x \end{bmatrix}$$
+```math
+R_x(\theta_x) = \begin{bmatrix} 1 & 0 & 0 \\ 0 & \cos\theta_x & -\sin\theta_x \\ 0 & \sin\theta_x & \cos\theta_x \end{bmatrix}
+```
 
 **Y-axis rotation** (yaw):
 
-$$R_y(\theta_y) = \begin{bmatrix} \cos\theta_y & 0 & \sin\theta_y \\ 0 & 1 & 0 \\ -\sin\theta_y & 0 & \cos\theta_y \end{bmatrix}$$
+```math
+R_y(\theta_y) = \begin{bmatrix} \cos\theta_y & 0 & \sin\theta_y \\ 0 & 1 & 0 \\ -\sin\theta_y & 0 & \cos\theta_y \end{bmatrix}
+```
 
 **Combined transformation:** First rotate around X, then around Y:
 
-$$\mathbf{p}' = R_y(\theta_y) \cdot R_x(\theta_x) \cdot \mathbf{p}$$
+```math
+\mathbf{p}' = R_y(\theta_y) \cdot R_x(\theta_x) \cdot \mathbf{p}
+```
 
 ---
 
@@ -122,7 +136,9 @@ We simulate a light source at position $\mathbf{L}$ using **Lambert's cosine law
 - The surface normal $\hat{\mathbf{n}}'$ (which way the surface faces)
 - The light direction $\hat{\mathbf{l}}$ (direction from surface to light)
 
-$$I = \max\left(0, \hat{\mathbf{n}}' \cdot \hat{\mathbf{l}}\right)$$
+```math
+I = \max\left(0, \hat{\mathbf{n}}' \cdot \hat{\mathbf{l}}\right)
+```
 
 where $\hat{\mathbf{l}} = \frac{\mathbf{L} - \mathbf{p}'}{||\mathbf{L} - \mathbf{p}'||}$ and the dot product $\cdot$ computes $\cos(\text{angle})$.
 
@@ -136,13 +152,19 @@ Now we flatten our 3D world onto a 2D screen using **perspective division**.
 
 The formula: objects farther away appear smaller. We achieve this with:
 
-$$z_{inv} = \frac{1}{z' + z_{offset}}$$
+```math
+z_{inv} = \frac{1}{z' + z_{offset}}
+```
 
 Then compute screen coordinates:
 
-$$x_{screen} = \frac{W}{2} + x' \cdot s_x \cdot z_{inv}$$
+```math
+x_{screen} = \frac{W}{2} + x' \cdot s_x \cdot z_{inv}
+```
 
-$$y_{screen} = \frac{H}{2} - y' \cdot s_y \cdot z_{inv}$$
+```math
+y_{screen} = \frac{H}{2} - y' \cdot s_y \cdot z_{inv}
+```
 
 where:
 - $W, H$ = screen width/height
@@ -159,13 +181,19 @@ Convert the brightness and color into colored ASCII characters.
 
 **Character selection** — denser characters = brighter areas:
 
-$$\text{char} = \text{ramp}[\lfloor I \cdot 11 \rfloor] \quad \text{where } \text{ramp} = \texttt{".,-~:;=!*#\$@"}$$
+```math
+\text{char} = \text{ramp}[\lfloor I \cdot 11 \rfloor] \quad \text{where } \text{ramp} = \texttt{".,-~:;=!*\#\$@"}
+```
 
 **Color darkening** — dim the RGB values based on lighting for better visuals:
 
-$$m = m_{min} + (1 - m_{min}) \cdot I$$
+```math
+m = m_{min} + (1 - m_{min}) \cdot I
+```
 
-$$C_{final} = \lfloor m \cdot C(\mathbf{p}) \rfloor$$
+```math
+C_{final} = \lfloor m \cdot C(\mathbf{p}) \rfloor
+```
 
 The $m_{min}$ threshold prevents colors from going completely black (keeps some visibility even in shadow).
 
@@ -179,7 +207,9 @@ The $m_{min}$ threshold prevents colors from going completely black (keeps some 
 
 **Solution:** For each pixel, store the depth of the closest surface drawn so far. Only update if the new surface is closer:
 
-$$\text{if } z_{inv} > z_{buffer}[x_{screen}, y_{screen}] \text{ then update pixel}$$
+```math
+\text{if } z_{inv} > z_{buffer}[x_{screen}, y_{screen}] \text{ then update pixel}
+```
 
 Since $z_{inv} = 1/z$, **larger values** = **smaller $z$** = **closer to camera**.
 

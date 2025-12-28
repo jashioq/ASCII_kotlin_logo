@@ -15,7 +15,7 @@ object Configuration {
     // Projection
     const val Z_OFFSET = 5.0
     const val SCALE_X = 140.0
-    const val SCREEN_WIDTH = 180
+    const val SCREEN_WIDTH = 150
     const val SCREEN_HEIGHT = 50
 
     // Rendering
