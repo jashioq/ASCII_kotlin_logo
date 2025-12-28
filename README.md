@@ -21,9 +21,9 @@ Customize the rendering by editing [Configuration.kt](src/main/kotlin/com/app/co
 
 **Frame Rate:**
 - `FRAME_DELAY_MS` - Milliseconds between frames
-  - `4L` = ~250 FPS
-  - `8L` = ~120 FPS
-  - `16L` = ~60 FPS
+  - `4L` = 250 FPS
+  - `8L` = 120 FPS
+  - `16L` = 60 FPS
 
 **Other Settings:**
 - `ROTATION_SPEED_X/Y` - Angular velocity for spinning
@@ -38,9 +38,9 @@ This renderer transforms 3D geometry into colored ASCII art through a multi-stag
 
 ### 🔷 **Step 1: Face Geometry Setup**
 
-**The Challenge:** We have a triangle defined by three corners (vertices) $\mathbf{v}_0, \mathbf{v}_1, \mathbf{v}_2$ floating in 3D space. We need to efficiently determine which points lie on this triangle.
+The Challenge: We have a triangle defined by three corners (vertices) $\mathbf{v}_0, \mathbf{v}_1, \mathbf{v}_2$ floating in 3D space. We need to efficiently determine which points lie on this triangle.
 
-**The Surface Normal** tells us which direction the triangle is facing (imagine an arrow perpendicular to the surface):
+The Surface Normal tells us which direction the triangle is facing (imagine an arrow perpendicular to the surface):
 
 ```math
 \mathbf{n} = \frac{(\mathbf{v}_1 - \mathbf{v}_0) \times (\mathbf{v}_2 - \mathbf{v}_0)}{||(\mathbf{v}_1 - \mathbf{v}_0) \times (\mathbf{v}_2 - \mathbf{v}_0)||}
@@ -48,10 +48,10 @@ This renderer transforms 3D geometry into colored ASCII art through a multi-stag
 
 The cross product $\times$ creates a vector perpendicular to both edges, and we normalize it to unit length.
 
-**Creating a Flat Map:** Think of the triangle as a tilted piece of paper in 3D space. We create a 2D coordinate system (like a grid on that paper) using two perpendicular basis vectors $\mathbf{u}$ and $\mathbf{v}$ that lie flat on the triangle:
+Creating a Flat Map: Think of the triangle as a tilted piece of paper in 3D space. We create a 2D coordinate system (like a grid on that paper) using two perpendicular basis vectors $\mathbf{u}$ and $\mathbf{v}$ that lie flat on the triangle:
 
 1. Pick an arbitrary vector $\mathbf{a}$ (avoiding parallel to $\mathbf{n}$)
-2. **Project out** the component parallel to the normal: $\mathbf{u} = \mathbf{a} - (\mathbf{a} \cdot \mathbf{n})\mathbf{n}$, then normalize
+2. Project out the component parallel to the normal: $\mathbf{u} = \mathbf{a} - (\mathbf{a} \cdot \mathbf{n})\mathbf{n}$, then normalize
 3. Complete the orthogonal basis: $\mathbf{v} = \mathbf{n} \times \mathbf{u}$
 
 Now any point on the face can be written as: $\mathbf{p} = \mathbf{v}_0 + \alpha\mathbf{u} + \beta\mathbf{v}$
@@ -64,15 +64,15 @@ The renderer checks points in a grid pattern to see which ones actually fall on 
 
 For normalized coordinates $(x_n, y_n) \in [-1, 1]^2$:
 
-1. **Scale to bounding box:** $x_f = x_{min} + \frac{(x_n + 1)(x_{max} - x_{min})}{2}$
-2. **Ray casting test:** Imagine shining a laser pointer horizontally from a point. Count how many triangle edges it crosses. Odd count = inside, even = outside.
-3. **Reconstruct 3D position:** $\mathbf{p} = \mathbf{v}_0 + x_f\mathbf{u} + y_f\mathbf{v}$
+1. Scale to bounding box:x_f = x_{min} + \frac{(x_n + 1)(x_{max} - x_{min})}{2}$
+2. Ray casting test: Imagine shining a laser pointer horizontally from a point. Count how many triangle edges it crosses. Odd count = inside, even = outside.
+3. Reconstruct 3D position: $\mathbf{p} = \mathbf{v}_0 + x_f\mathbf{u} + y_f\mathbf{v}$
 
 ---
 
 ### 🌈 **Step 3: Gradient Color Calculation**
 
-Our triangle has a color gradient from red $\text{RGB}(255, 0, 0)$ at point $\mathbf{p}_{start}$ to blue $\text{RGB}(0, 0, 255)$ at point $\mathbf{p}_{end}$.
+Our triangle has a color gradient from red RGB(255, 0, 0) at point $\mathbf{p}_{start}$ to blue RGB(0, 0, 255) at point $\mathbf{p}_{end}$.
 
 Define the gradient direction vector:
 
@@ -80,13 +80,13 @@ Define the gradient direction vector:
 \mathbf{g} = \mathbf{p}_{end} - \mathbf{p}_{start}
 ```
 
-**Project the point onto the gradient:** This tells us "how far along" the gradient we are (0 = start, 1 = end):
+Project the point onto the gradient: This tells us "how far along" the gradient we are (0 = start, 1 = end):
 
 ```math
 t = \frac{(\mathbf{p} - \mathbf{p}_{start}) \cdot \mathbf{g}}{||\mathbf{g}||^2}
 ```
 
-**Blend the colors** using linear interpolation (lerp):
+Blend the colors using linear interpolation (lerp):
 
 ```math
 C(\mathbf{p}) = C_{start} + t(C_{end} - C_{start})
@@ -107,21 +107,21 @@ Result: $\text{RGB}(127, 0, 127)$ - a purple color halfway between red and blue.
 
 ### 🔄 **Step 4: 3D Rotation**
 
-To animate the spinning, we apply **rotation matrices** to both the point and its normal vector.
+To animate the spinning, we apply rotation matrice to both the point and its normal vector.
 
-**X-axis rotation** (pitch):
+X-axis rotation (pitch):
 
 ```math
 R_x(\theta_x) = \begin{bmatrix} 1 & 0 & 0 \\ 0 & \cos\theta_x & -\sin\theta_x \\ 0 & \sin\theta_x & \cos\theta_x \end{bmatrix}
 ```
 
-**Y-axis rotation** (yaw):
+Y-axis rotation (yaw):
 
 ```math
 R_y(\theta_y) = \begin{bmatrix} \cos\theta_y & 0 & \sin\theta_y \\ 0 & 1 & 0 \\ -\sin\theta_y & 0 & \cos\theta_y \end{bmatrix}
 ```
 
-**Combined transformation:** First rotate around X, then around Y:
+Combined transformation: First rotate around X, then around Y:
 
 ```math
 \mathbf{p}' = R_y(\theta_y) \cdot R_x(\theta_x) \cdot \mathbf{p}
@@ -133,7 +133,7 @@ R_y(\theta_y) = \begin{bmatrix} \cos\theta_y & 0 & \sin\theta_y \\ 0 & 1 & 0 \\ 
 
 We simulate a light source at position $\mathbf{L}$ using Lambert's cosine law.
 
-**The key idea:** Surfaces facing the light appear brighter. This is measured by the angle between:
+Surfaces facing the light appear brighter. This is measured by the angle between:
 - The surface normal $\hat{\mathbf{n}}'$ (which way the surface faces)
 - The light direction $\hat{\mathbf{l}}$ (direction from surface to light)
 
@@ -180,13 +180,13 @@ where:
 
 Convert the brightness and color into colored ASCII characters.
 
-**Character selection** - denser characters = brighter areas:
+Character selection - denser characters = brighter areas:
 
 ```math
 \text{char} = \text{ramp}[\lfloor I \cdot 11 \rfloor] \quad \text{where } \text{ramp} = \texttt{".,-~:;=!*\#\$@"}
 ```
 
-**Color darkening** - dim the RGB values based on lighting for better visuals:
+Color darkening - dim the RGB values based on lighting for better visuals:
 
 ```math
 m = m_{min} + (1 - m_{min}) \cdot I
@@ -198,15 +198,15 @@ C_{final} = \lfloor m \cdot C(\mathbf{p}) \rfloor
 
 The $m_{min}$ threshold prevents colors from going completely black (keeps some visibility even in shadow).
 
-**Output:** Wrap it in ANSI color codes: `\u001b[38;2;R;G;Bm` + char + `\u001b[0m`
+Output: Wrap it in ANSI color codes: `\u001b[38;2;R;G;Bm` + char + `\u001b[0m`
 
 ---
 
 ### 🗂️ **Step 8: Z-Buffering**
 
-**The visibility problem:** When multiple triangles overlap on screen, which one should we see?
+The visibility problem: When multiple triangles overlap on screen, which one should we see?
 
-**Solution:** For each pixel, store the depth of the closest surface drawn so far. Only update if the new surface is closer:
+Solution: For each pixel, store the depth of the closest surface drawn so far. Only update if the new surface is closer:
 
 ```math
 \text{if } z_{inv} > z_{buffer}[x_{screen}, y_{screen}] \text{ then update pixel}
