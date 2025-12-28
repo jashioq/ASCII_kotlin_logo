@@ -22,3 +22,13 @@ dependencies {
 application {
     mainClass.set("com/app/MainKt")
 }
+
+kotlin {
+    jvmToolchain(21)
+}
+
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(21))
+    }
+}
