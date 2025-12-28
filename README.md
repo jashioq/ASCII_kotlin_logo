@@ -64,7 +64,7 @@ The renderer checks points in a grid pattern to see which ones actually fall on 
 
 For normalized coordinates $(x_n, y_n) \in [-1, 1]^2$:
 
-1. Scale to bounding box:x_f = x_{min} + \frac{(x_n + 1)(x_{max} - x_{min})}{2}$
+1. Scale to bounding box: $x_f = x_{min} + \frac{(x_n + 1)(x_{max} - x_{min})}{2}$
 2. Ray casting test: Imagine shining a laser pointer horizontally from a point. Count how many triangle edges it crosses. Odd count = inside, even = outside.
 3. Reconstruct 3D position: $\mathbf{p} = \mathbf{v}_0 + x_f\mathbf{u} + y_f\mathbf{v}$
 
@@ -72,7 +72,7 @@ For normalized coordinates $(x_n, y_n) \in [-1, 1]^2$:
 
 ### 🌈 **Step 3: Gradient Color Calculation**
 
-Our triangle has a color gradient from red RGB(255, 0, 0) at point $\mathbf{p}_{start}$ to blue RGB(0, 0, 255) at point $\mathbf{p}_{end}$.
+Our triangle has a color gradient from red RGB(255, 0, 0) at point $p_{start}$ to blue RGB(0, 0, 255) at point $p_{end}$.
 
 Define the gradient direction vector:
 
