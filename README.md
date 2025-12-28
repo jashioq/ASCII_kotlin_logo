@@ -16,8 +16,8 @@ Build and run:
 Customize the rendering by editing [Configuration.kt](src/main/kotlin/com/app/config/Configuration.kt):
 
 **Terminal Size:**
-- `SCREEN_WIDTH` - Terminal width in characters (default: 150)
-- `SCREEN_HEIGHT` - Terminal height in characters (default: 50)
+- `SCREEN_WIDTH` - Terminal width in characters
+- `SCREEN_HEIGHT` - Terminal height in characters
 
 **Frame Rate:**
 - `FRAME_DELAY_MS` - Milliseconds between frames
@@ -32,13 +32,13 @@ Customize the rendering by editing [Configuration.kt](src/main/kotlin/com/app/co
 
 ## How It Works
 
-This renderer transforms 3D geometry into colored ASCII art through a multi-stage pipeline. Let's walk through rendering a single triangular face with a **Kotlin blue → purple gradient**.
+This renderer transforms 3D geometry into colored ASCII art through a multi-stage pipeline. Let's walk through rendering a single triangular face with a **Kotlin blue to purple gradient**.
 
 ---
 
 ### 🔷 **Step 1: Face Geometry Setup**
 
-**The Challenge:** We have a triangle defined by three corners (vertices) $\mathbf{v}_0, \mathbf{v}_1, \mathbf{v}_2$ floating in 3D space. We need to efficiently determine which points lie *on* this triangle.
+**The Challenge:** We have a triangle defined by three corners (vertices) $\mathbf{v}_0, \mathbf{v}_1, \mathbf{v}_2$ floating in 3D space. We need to efficiently determine which points lie on this triangle.
 
 **The Surface Normal** tells us which direction the triangle is facing (imagine an arrow perpendicular to the surface):
 
@@ -171,7 +171,7 @@ where:
 - $s_x, s_y$ = scale factors (field of view)
 - $z_{offset}$ = camera distance (prevents division by zero)
 
-> *Why $1/z$?* Far objects (large $z$) get small $z_{inv}$, pulling coordinates toward the center. Near objects get large $z_{inv}$, spreading coordinates out.
+> Why $1/z$ Far objects (large $z$) get small $z_{inv}$, pulling coordinates toward the center. Near objects get large $z_{inv}$, spreading coordinates out.
 
 ---
 
@@ -179,13 +179,13 @@ where:
 
 Convert the brightness and color into colored ASCII characters.
 
-**Character selection** — denser characters = brighter areas:
+**Character selection** - denser characters = brighter areas:
 
 ```math
 \text{char} = \text{ramp}[\lfloor I \cdot 11 \rfloor] \quad \text{where } \text{ramp} = \texttt{".,-~:;=!*\#\$@"}
 ```
 
-**Color darkening** — dim the RGB values based on lighting for better visuals:
+**Color darkening** - dim the RGB values based on lighting for better visuals:
 
 ```math
 m = m_{min} + (1 - m_{min}) \cdot I
@@ -211,6 +211,6 @@ The $m_{min}$ threshold prevents colors from going completely black (keeps some 
 \text{if } z_{inv} > z_{buffer}[x_{screen}, y_{screen}] \text{ then update pixel}
 ```
 
-Since $z_{inv} = 1/z$, **larger values** = **smaller $z$** = **closer to camera**.
+Since $z_{inv} = 1/z$, larger values = smaller $z$ = closer to camera.
 
 
