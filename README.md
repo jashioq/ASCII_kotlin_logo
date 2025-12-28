@@ -32,7 +32,7 @@ Customize the rendering by editing [Configuration.kt](src/main/kotlin/com/app/co
 
 ## How It Works
 
-This renderer transforms 3D geometry into colored ASCII art through a multi-stage pipeline. Let's walk through rendering a single triangular face with a **Kotlin blue to purple gradient**.
+This renderer transforms 3D geometry into colored ASCII art through a multi-stage pipeline. Let's walk through rendering a single triangular face with a red to blue gradient.
 
 ---
 
@@ -67,11 +67,12 @@ For normalized coordinates $(x_n, y_n) \in [-1, 1]^2$:
 1. **Scale to bounding box:** $x_f = x_{min} + \frac{(x_n + 1)(x_{max} - x_{min})}{2}$
 2. **Ray casting test:** Imagine shining a laser pointer horizontally from a point. Count how many triangle edges it crosses. Odd count = inside, even = outside.
 3. **Reconstruct 3D position:** $\mathbf{p} = \mathbf{v}_0 + x_f\mathbf{u} + y_f\mathbf{v}$
+
 ---
 
 ### 🌈 **Step 3: Gradient Color Calculation**
 
-Our triangle has a color gradient from **red** $\text{RGB}(255, 0, 0)$ at point $\mathbf{p}_{start}$ to **blue** $\text{RGB}(0, 0, 255)$ at point $\mathbf{p}_{end}$.
+Our triangle has a color gradient from red $\text{RGB}(255, 0, 0)$ at point $\mathbf{p}_{start}$ to blue $\text{RGB}(0, 0, 255)$ at point $\mathbf{p}_{end}$.
 
 Define the gradient direction vector:
 
@@ -92,7 +93,7 @@ C(\mathbf{p}) = C_{start} + t(C_{end} - C_{start})
 ```
 
 <details>
-<summary>📊 Example calculation</summary>
+<summary>Example calculation</summary>
 
 If $t = 0.5$ (halfway along the gradient):
 - $R = 255 + 0.5 \times (0 - 255) = 127.5$
@@ -130,7 +131,7 @@ R_y(\theta_y) = \begin{bmatrix} \cos\theta_y & 0 & \sin\theta_y \\ 0 & 1 & 0 \\ 
 
 ### 💡 **Step 5: Lighting Calculation**
 
-We simulate a light source at position $\mathbf{L}$ using **Lambert's cosine law** (diffuse lighting).
+We simulate a light source at position $\mathbf{L}$ using Lambert's cosine law.
 
 **The key idea:** Surfaces facing the light appear brighter. This is measured by the angle between:
 - The surface normal $\hat{\mathbf{n}}'$ (which way the surface faces)
@@ -148,7 +149,7 @@ where $\hat{\mathbf{l}} = \frac{\mathbf{L} - \mathbf{p}'}{||\mathbf{L} - \mathbf
 
 ### 📐 **Step 6: Perspective Projection**
 
-Now we flatten our 3D world onto a 2D screen using **perspective division**.
+Now we flatten our 3D world onto a 2D screen using perspective division.
 
 The formula: objects farther away appear smaller. We achieve this with:
 
@@ -171,7 +172,7 @@ where:
 - $s_x, s_y$ = scale factors (field of view)
 - $z_{offset}$ = camera distance (prevents division by zero)
 
-> Why $1/z$ Far objects (large $z$) get small $z_{inv}$, pulling coordinates toward the center. Near objects get large $z_{inv}$, spreading coordinates out.
+> Why $1/z$? Far objects (large $z$) get small $z_{inv}$, pulling coordinates toward the center. Near objects get large $z_{inv}$, spreading coordinates out.
 
 ---
 
@@ -212,5 +213,3 @@ The $m_{min}$ threshold prevents colors from going completely black (keeps some 
 ```
 
 Since $z_{inv} = 1/z$, larger values = smaller $z$ = closer to camera.
-
-
