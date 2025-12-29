@@ -21,7 +21,7 @@ Customize the rendering by editing [Configuration.kt](src/main/kotlin/com/app/co
 
 **Frame Rate:**
 - `FRAME_DELAY_MS` - Milliseconds between frames
-  - `4L` = 250 FPS
+  - `4L` = 240 FPS
   - `8L` = 120 FPS
   - `16L` = 60 FPS
 
