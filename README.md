@@ -1,8 +1,8 @@
-# ASCII Kotlin Logo Renderer
+# ASCII Kotlin logo renderer
 
 ![](kotlin_spin.gif)
 
-## Running the Project
+## Running the project
 
 Build and run:
 
@@ -15,28 +15,28 @@ Build and run:
 
 Customize the rendering by editing [Configuration.kt](src/main/kotlin/com/app/config/Configuration.kt):
 
-**Terminal Size:**
+**Terminal size:**
 - `SCREEN_WIDTH` - Terminal width in characters
 - `SCREEN_HEIGHT` - Terminal height in characters
 
-**Frame Rate:**
+**Frame rate:**
 - `FRAME_DELAY_MS` - Milliseconds between frames
   - `4L` = 250 FPS
   - `8L` = 120 FPS
   - `16L` = 60 FPS
 
-**Other Settings:**
+**Other settings:**
 - `ROTATION_SPEED_X/Y` - Angular velocity for spinning
 - `SCALE_X` - Field of view (higher = more zoomed in)
 - `MIN_COLOR_BRIGHTNESS` - Minimum color intensity (0.0-1.0)
 
-## How It Works
+## How it works
 
 This renderer transforms 3D geometry into colored ASCII art through a multi-stage pipeline. Let's walk through rendering a single triangular face with a red to blue gradient.
 
 ---
 
-### 🔷 **Step 1: Face Geometry Setup**
+### 🔷 **Step 1: Face geometry setup**
 
 The Challenge: We have a triangle defined by three corners (vertices) $\mathbf{v}_0, \mathbf{v}_1, \mathbf{v}_2$ floating in 3D space. We need to efficiently determine which points lie on this triangle.
 
@@ -58,7 +58,7 @@ Now any point on the face can be written as: $\mathbf{p} = \mathbf{v}_0 + \alpha
 
 ---
 
-### 🎯 **Step 2: Face Sampling**
+### 🎯 **Step 2: Face sampling**
 
 The renderer checks points in a grid pattern to see which ones actually fall on the triangle.
 
@@ -70,7 +70,7 @@ For normalized coordinates $(x_n, y_n) \in [-1, 1]^2$:
 
 ---
 
-### 🌈 **Step 3: Gradient Color Calculation**
+### 🌈 **Step 3: Gradient color calculation**
 
 Our triangle has a color gradient from red RGB(255, 0, 0) at point $p_{start}$ to blue RGB(0, 0, 255) at point $p_{end}$.
 
@@ -105,7 +105,7 @@ Result: $\text{RGB}(127, 0, 127)$ - a purple color halfway between red and blue.
 
 ---
 
-### 🔄 **Step 4: 3D Rotation**
+### 🔄 **Step 4: 3D rotation**
 
 To animate the spinning, we apply rotation matrice to both the point and its normal vector.
 
@@ -129,7 +129,7 @@ Combined transformation: First rotate around X, then around Y:
 
 ---
 
-### 💡 **Step 5: Lighting Calculation**
+### 💡 **Step 5: Lighting calculation**
 
 We simulate a light source at position $\mathbf{L}$ using Lambert's cosine law.
 
@@ -147,7 +147,7 @@ where $\hat{\mathbf{l}} = \frac{\mathbf{L} - \mathbf{p}'}{||\mathbf{L} - \mathbf
 
 ---
 
-### 📐 **Step 6: Perspective Projection**
+### 📐 **Step 6: Perspective projection**
 
 Now we flatten our 3D world onto a 2D screen using perspective division.
 
@@ -176,7 +176,7 @@ where:
 
 ---
 
-### 🎨 **Step 7: ASCII Rasterization**
+### 🎨 **Step 7: ASCII character mapping**
 
 Convert the brightness and color into colored ASCII characters.
 
